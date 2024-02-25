@@ -8,14 +8,6 @@
 
 Game* game;
 
-static void Coroutine(mco_coro*);
-static int CoroutineSelectPokemon(mco_coro*, int);
-static int CoroutineSelectAction(mco_coro*, int);
-
-static void coroutine_wrapper(mco_coro* co) {
-	Coroutine(co);
-}
-
 static void AddPokemon(vector<Pokemon>& pokemon,
 					   PokemonType type) {
 	const PokemonData* data = GetPokemonData(type);
@@ -75,17 +67,10 @@ void Game::Init() {
 	AddPokemon(players[1].pokemon, POKEMON_BULBASAUR);
 	AddPokemon(players[1].pokemon, POKEMON_CHARMANDER);
 
-	{
-		mco_desc desc = mco_desc_init(coroutine_wrapper, 0);
-		mco_create(&coroutine, &desc);
-	}
-
 	SetState(GAME_STATE_SELECT_ACTION, 0);
 }
 
 void Game::Destroy() {
-	mco_destroy(coroutine);
-
 	UnloadAssets();
 
 	Mix_CloseAudio();
@@ -195,16 +180,6 @@ void Game::Update(float delta) {
 	skip_draw = false;
 
 	//*
-
-	// if (next_state != (GameState)-1) {
-	// 	state = next_state;
-	// 	player_index = next_current_player;
-	// 	cursor = 0;
-	// 
-	// 	next_state = (GameState)-1;
-	// 	next_current_player = -1;
-	// }
-
 	switch (state) {
 		case GAME_STATE_SELECT_ACTION: {
 			for (int i = 0; i < PLAYER_COUNT; i++) {
@@ -327,88 +302,6 @@ void Game::Update(float delta) {
 		}
 	}
 	//*/
-
-
-	/*
-	if (mco_status(coroutine) == MCO_SUSPENDED) {
-		mco_resume(coroutine);
-	}
-	//*/
-
-}
-
-static void Coroutine(mco_coro* co) {
-	int player_index = 0;
-
-	while (true) {
-		for (int i = 0; i < PLAYER_COUNT; i++) {
-			if (game->players[i].pokemon_index == -1) {
-				int pokemon_index = CoroutineSelectPokemon(co, i);
-				game->players[i].pokemon_index = pokemon_index;
-			}
-		}
-
-		int action = CoroutineSelectAction(co, player_index);
-		switch (action) {
-			case 0: {
-
-				break;
-			}
-
-			case 1: {
-
-				break;
-			}
-
-			case 2: {
-
-				break;
-			}
-		}
-
-		player_index++;
-		player_index %= PLAYER_COUNT;
-	}
-}
-
-static int CoroutineSelectPokemon(mco_coro* co, int player_index) {
-	game->SetState(GAME_STATE_SELECT_POKEMON, player_index);
-
-	int cursor = 0;
-
-	while (true) {
-		Player& p = game->players[player_index];
-
-		cursor += IsKeyPressed(SDL_SCANCODE_DOWN) - IsKeyPressed(SDL_SCANCODE_UP);
-		cursor = wrap(cursor, (int)p.pokemon.size());
-
-		if (IsKeyPressed(SDL_SCANCODE_Z)) {
-			mco_yield(co);
-			return cursor;
-		}
-
-		game->cursor = cursor;
-		mco_yield(co);
-	}
-}
-
-static int CoroutineSelectAction(mco_coro* co, int player_index) {
-	game->SetState(GAME_STATE_SELECT_ACTION, player_index);
-
-	int cursor = 0;
-
-	while (true) {
-		cursor += IsKeyPressed(SDL_SCANCODE_DOWN) - IsKeyPressed(SDL_SCANCODE_UP);
-		cursor = wrap(cursor, 4);
-
-		if (IsKeyPressed(SDL_SCANCODE_Z)) {
-			mco_yield(co);
-			return cursor;
-		}
-
-		game->cursor = cursor;
-		mco_yield(co);
-	}
 }
 
 static void DrawPokemonLabel(int x, int y,

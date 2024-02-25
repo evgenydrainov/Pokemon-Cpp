@@ -3,7 +3,6 @@
 #include "common.h"
 #include "GameData.h"
 
-#include <minicoro.h>
 #include <SDL.h>
 #include <vector>
 
@@ -46,8 +45,6 @@ struct Game {
 	int submenu_cursor;
 	int animation_timer;
 
-	mco_coro* coroutine;
-
 	u32 font;
 
 	SDL_Window* window;
@@ -66,20 +63,13 @@ struct Game {
 	void Draw(float delta);
 	void DrawUI(int ui_y);
 
-	void Coroutine(mco_coro* co);
-	int CoroutineSelectPokemon(mco_coro* co, int player_index);
-	int CoroutineSelectAction(mco_coro* co, int player_index);
-
-	void SetState(GameState state, int player_index) {
-		// next_state = state;
-		// next_player_index = player_index;
-
-		this->state = state;
-		this->player_index = player_index;
-		this->cursor = 0;
-		this->submenu = -1;
-		this->submenu_cursor = 0;
-		this->skip_draw = true;
-		this->animation_timer = 0;
+	void SetState(GameState _state, int _player_index) {
+		state = _state;
+		player_index = _player_index;
+		cursor = 0;
+		submenu = -1;
+		submenu_cursor = 0;
+		skip_draw = true;
+		animation_timer = 0;
 	}
 };
