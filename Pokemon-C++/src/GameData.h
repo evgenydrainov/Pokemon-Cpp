@@ -16,11 +16,21 @@ struct AttackData {
 	u32 sound_index;
 };
 
+enum Element {
+	ELEMENT_LIGHNING,
+	ELEMENT_WATER,
+	ELEMENT_FIRE,
+
+	ELEMENT_COUNT,
+};
+
 struct PokemonData {
 	const char* name;
 	float max_hp;
+	float max_energy;
 	const AttackData* attacks;
 	int attack_count;
+	Element element;
 };
 
 const PokemonData* GetPokemonData(PokemonType type);

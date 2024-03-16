@@ -16,6 +16,7 @@ using std::vector;
 struct Pokemon {
 	PokemonType type;
 	float hp;
+	float energy;
 };
 
 enum GameState {
@@ -44,6 +45,8 @@ struct Game {
 	int submenu = -1;
 	int submenu_cursor;
 	int animation_timer;
+	int animation_attack_index;
+	int text_teletype;
 
 	u32 font;
 
@@ -67,9 +70,14 @@ struct Game {
 		state = _state;
 		player_index = _player_index;
 		cursor = 0;
-		submenu = -1;
+		animation_timer = 0;
+		SetSubState(-1);
+	}
+
+	void SetSubState(int _submenu) {
+		submenu = _submenu;
 		submenu_cursor = 0;
 		skip_draw = true;
-		animation_timer = 0;
+		text_teletype = 0;
 	}
 };

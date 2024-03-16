@@ -70,9 +70,10 @@ void DrawText(u32 font_index, int x, int y,
 			dest.h = glyph.src.h;
 
 			if (ch != ' ') {
-				SDL_SetTextureColorMod(GetTexture(font.texture_index), color.r, color.g, color.b);
-				SDL_SetTextureAlphaMod(GetTexture(font.texture_index), color.a);
-				SDL_RenderCopy(game->renderer, GetTexture(font.texture_index), &src, &dest);
+				SDL_Texture* texture = GetTexture(font.texture_index);
+				SDL_SetTextureColorMod(texture, color.r, color.g, color.b);
+				SDL_SetTextureAlphaMod(texture, color.a);
+				SDL_RenderCopy(game->renderer, texture, &src, &dest);
 			}
 
 			ch_x += glyph.advance;
@@ -86,59 +87,61 @@ void DrawText(u32 font_index, int x, int y,
 }
 
 void DrawNineslice(int x, int y, int w, int h) {
+	SDL_Texture* texture = GetTexture(tex_nineslice);
+
 	// top left
 	{
 		SDL_Rect src = {0, 0, 8, 8};
 		SDL_Rect dest = {x, y, 8, 8};
-		SDL_RenderCopy(game->renderer, GetTexture(tex_nineslice), &src, &dest);
+		SDL_RenderCopy(game->renderer, texture, &src, &dest);
 	}
 	// top
 	{
 		SDL_Rect src = {8, 0, 8, 8};
 		SDL_Rect dest = {x + 8, y, w - 16, 8};
-		SDL_RenderCopy(game->renderer, GetTexture(tex_nineslice), &src, &dest);
+		SDL_RenderCopy(game->renderer, texture, &src, &dest);
 	}
 	// top right
 	{
 		SDL_Rect src = {16, 0, 8, 8};
 		SDL_Rect dest = {x + w - 8, y, 8, 8};
-		SDL_RenderCopy(game->renderer, GetTexture(tex_nineslice), &src, &dest);
+		SDL_RenderCopy(game->renderer, texture, &src, &dest);
 	}
 	// left
 	{
 		SDL_Rect src = {0, 8, 8, 8};
 		SDL_Rect dest = {x, y + 8, 8, h - 16};
-		SDL_RenderCopy(game->renderer, GetTexture(tex_nineslice), &src, &dest);
+		SDL_RenderCopy(game->renderer, texture, &src, &dest);
 	}
 	// middle
 	{
 		SDL_Rect src = {8, 8, 8, 8};
 		SDL_Rect dest = {x + 8, y + 8, w - 16, h - 16};
-		SDL_RenderCopy(game->renderer, GetTexture(tex_nineslice), &src, &dest);
+		SDL_RenderCopy(game->renderer, texture, &src, &dest);
 	}
 	// right
 	{
 		SDL_Rect src = {16, 8, 8, 8};
 		SDL_Rect dest = {x + w - 8, y + 8, 8, h - 16};
-		SDL_RenderCopy(game->renderer, GetTexture(tex_nineslice), &src, &dest);
+		SDL_RenderCopy(game->renderer, texture, &src, &dest);
 	}
 	// bottom left
 	{
 		SDL_Rect src = {0, 16, 8, 8};
 		SDL_Rect dest = {x, y + h - 8, 8, 8};
-		SDL_RenderCopy(game->renderer, GetTexture(tex_nineslice), &src, &dest);
+		SDL_RenderCopy(game->renderer, texture, &src, &dest);
 	}
 	// bottom
 	{
 		SDL_Rect src = {8, 16, 8, 8};
 		SDL_Rect dest = {x + 8, y + h - 8, w - 16, 8};
-		SDL_RenderCopy(game->renderer, GetTexture(tex_nineslice), &src, &dest);
+		SDL_RenderCopy(game->renderer, texture, &src, &dest);
 	}
 	// bottom right
 	{
 		SDL_Rect src = {16, 16, 8, 8};
 		SDL_Rect dest = {x + w - 8, y + h - 8, 8, 8};
-		SDL_RenderCopy(game->renderer, GetTexture(tex_nineslice), &src, &dest);
+		SDL_RenderCopy(game->renderer, texture, &src, &dest);
 	}
 }
 

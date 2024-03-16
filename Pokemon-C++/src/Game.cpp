@@ -12,15 +12,40 @@ static void AddPokemon(vector<Pokemon>& pokemon,
 					   PokemonType type) {
 	const PokemonData* data = GetPokemonData(type);
 
-	Pokemon p;
+	Pokemon p = {};
 	p.type = type;
 	p.hp = data->max_hp;
+	p.energy = data->max_energy;
 
 	pokemon.push_back(p);
 }
 
+/*
+static void* malloc_print(size_t size) {
+	printf("malloc(%zu)\n", size);
+	return malloc(size);
+}
+
+static void* calloc_print(size_t count, size_t size) {
+	printf("calloc(%zu, %zu)\n", count, size);
+	return calloc(count, size);
+}
+
+static void* realloc_print(void* ptr, size_t size) {
+	printf("realloc(%p, %zu)\n", ptr, size);
+	return realloc(ptr, size);
+}
+
+static void free_print(void* ptr) {
+	printf("free(%p)\n", ptr);
+	free(ptr);
+}
+//*/
+
 void Game::Init() {
 	font = fnt_gameboy;
+
+	// SDL_SetMemoryFunctions(malloc_print, calloc_print, realloc_print, free_print);
 
 	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
 
@@ -66,6 +91,9 @@ void Game::Init() {
 
 	AddPokemon(players[1].pokemon, POKEMON_BULBASAUR);
 	AddPokemon(players[1].pokemon, POKEMON_CHARMANDER);
+
+	players_visual[0] = players[0];
+	players_visual[1] = players[1];
 
 	SetState(GAME_STATE_SELECT_ACTION, 0);
 }
@@ -173,7 +201,9 @@ void Game::PerformAttack() {
 	Player& opponent = (player_index == 0) ? players[1] : players[0];
 	Pokemon& opponent_pokemon = opponent.pokemon[opponent.pokemon_index];
 
-	opponent_pokemon.hp -= GetPokemonData(pokemon.type)->attacks[submenu_cursor].damage;
+	const AttackData& attack = GetPokemonData(pokemon.type)->attacks[submenu_cursor];
+
+	opponent_pokemon.hp -= attack.damage;
 }
 
 void Game::Update(float delta) {
@@ -203,9 +233,7 @@ void Game::Update(float delta) {
 
 			if (submenu == -1) {
 				if (NavigateMenuAndSelect(cursor, 4, 3)) {
-					submenu = cursor;
-					submenu_cursor = 0;
-					skip_draw = true;
+					SetSubState(cursor);
 					goto state_select_action_out;
 				}
 			} else {
@@ -223,9 +251,11 @@ void Game::Update(float delta) {
 								opponent.pokemon.erase(opponent.pokemon.begin() + opponent.pokemon_index);
 								opponent.pokemon_index = -1;
 
+								animation_attack_index = submenu_cursor;
 								// SetState(GAME_STATE_WATCHING_DEATH_ANIM, player_index);
 								SetState(GAME_STATE_WATCHING_ATTACK_ANIM, player_index);
 							} else {
+								animation_attack_index = submenu_cursor;
 								SetState(GAME_STATE_WATCHING_ATTACK_ANIM, player_index);
 							}
 							goto state_select_action_out;
@@ -248,12 +278,13 @@ void Game::Update(float delta) {
 				}
 
 				if (IsKeyPressed(SDL_SCANCODE_X)) {
-					submenu = -1;
-					submenu_cursor = 0;
-					skip_draw = true;
+					SetSubState(-1);
 					goto state_select_action_out;
 				}
 			}
+
+			players_visual[0] = players[0];
+			players_visual[1] = players[1];
 
 		state_select_action_out:
 			break;
@@ -275,6 +306,10 @@ void Game::Update(float delta) {
 				SetState(GAME_STATE_SELECT_ACTION, player_index);
 				break;
 			}
+
+			players_visual[0] = players[0];
+			players_visual[1] = players[1];
+
 			break;
 		}
 
@@ -290,14 +325,42 @@ void Game::Update(float delta) {
 			}
 
 			if (animation_timer >= 3 * 60) {
-				int players = player_index;
-				players++;
-				players %= PLAYER_COUNT;
+				int player = player_index;
+				player++;
+				player %= PLAYER_COUNT;
 
-				SetState(GAME_STATE_SELECT_ACTION, players);
+				SetState(GAME_STATE_SELECT_ACTION, player);
+				break;
+			}
+
+			if (animation_timer >= 2 * 60) {
+				for (int i = 0; i < PLAYER_COUNT; i++) {
+					Player& player = players[i];
+					Player& player_visual = players_visual[i];
+
+					Pokemon& pokemon_visual = player_visual.pokemon[player_visual.pokemon_index];
+
+					if (player.pokemon_index == -1) {
+						pokemon_visual.hp = approach(pokemon_visual.hp, 0.0f, 0.9f * delta);
+					} else {
+						Pokemon& pokemon = player.pokemon[player.pokemon_index];
+						pokemon_visual.hp = approach(pokemon_visual.hp, pokemon.hp, 0.9f * delta);
+					}
+				}
 			}
 
 			animation_timer++;
+			text_teletype++;
+			break;
+		}
+
+		case GAME_STATE_WON: {
+
+			players_visual[0] = players[0];
+			players_visual[1] = players[1];
+
+			text_teletype++;
+
 			break;
 		}
 	}
@@ -318,7 +381,44 @@ static void DrawPokemonLabel(int x, int y,
 	DrawText(game->font, x, y, buf);
 }
 
+static void DrawPokemon(int player_index,
+						u32 texture_index,
+						int x, int y) {
+	const Player* players = game->players_visual;
+
+	const Player& p = players[player_index];
+	const Pokemon& pokemon = p.pokemon[p.pokemon_index];
+
+	SDL_Rect src;
+	src.x = 56 * pokemon.type;
+	src.y = 0;
+	src.w = 56;
+	src.h = 56;
+
+	SDL_Rect dest;
+	dest.x = x;
+	dest.y = y;
+	dest.w = 56;
+	dest.h = 56;
+
+	bool flash = false;
+	if (game->state == GAME_STATE_WATCHING_ATTACK_ANIM && game->player_index == (1 - player_index)) {
+		if (game->animation_timer >= 2 * 60) {
+			flash = true;
+		}
+	}
+
+	if (!flash || SDL_GetTicks() / 100 % 2) {
+		SDL_Texture* texture = GetTexture(texture_index);
+		SDL_RenderCopy(game->renderer, texture, &src, &dest);
+	}
+
+	DrawPokemonLabel(dest.x, dest.y, pokemon);
+}
+
 void Game::Draw(float delta) {
+	const Player* players = players_visual;
+
 	SDL_SetRenderTarget(renderer, game_texture);
 
 	if (!skip_draw) {
@@ -329,66 +429,16 @@ void Game::Draw(float delta) {
 
 		if (players[1].pokemon_index != -1) {
 			// draw pokemon front
-
-			const Player& p = players[1];
-			const Pokemon& pokemon = p.pokemon[p.pokemon_index];
-
-			SDL_Rect src;
-			src.x = 56 * pokemon.type;
-			src.y = 0;
-			src.w = 56;
-			src.h = 56;
-
-			SDL_Rect dest;
-			dest.x = GAME_W - 56 - 5 * 8;
-			dest.y = 6 * 8;
-			dest.w = 56;
-			dest.h = 56;
-
-			bool flash = false;
-			if (state == GAME_STATE_WATCHING_ATTACK_ANIM && player_index == 0) {
-				if (animation_timer >= 2 * 60) {
-					flash = true;
-				}
-			}
-
-			if (!flash || SDL_GetTicks() / 100 % 2) {
-				SDL_RenderCopy(renderer, GetTexture(tex_pokemon_front), &src, &dest);
-			}
-
-			DrawPokemonLabel(dest.x, dest.y, pokemon);
+			int x = GAME_W - 56 - 5 * 8;
+			int y = 6 * 8;
+			DrawPokemon(1, tex_pokemon_front, x, y);
 		}
 
 		if (players[0].pokemon_index != -1) {
 			// draw pokemon back
-
-			const Player& p = players[0];
-			const Pokemon& pokemon = p.pokemon[p.pokemon_index];
-
-			SDL_Rect src;
-			src.x = 56 * pokemon.type;
-			src.y = 0;
-			src.w = 56;
-			src.h = 56;
-
-			SDL_Rect dest;
-			dest.x = 3 * 8;
-			dest.y = ui_y - 56 - 16;
-			dest.w = 56;
-			dest.h = 56;
-
-			bool flash = false;
-			if (state == GAME_STATE_WATCHING_ATTACK_ANIM && player_index == 1) {
-				if (animation_timer >= 2 * 60) {
-					flash = true;
-				}
-			}
-
-			if (!flash || SDL_GetTicks() / 100 % 2) {
-				SDL_RenderCopy(renderer, GetTexture(tex_pokemon_back), &src, &dest);
-			}
-
-			DrawPokemonLabel(dest.x, dest.y, pokemon);
+			int x = 3 * 8;
+			int y = ui_y - 56 - 16;
+			DrawPokemon(0, tex_pokemon_back, x, y);
 		}
 
 		DrawUI(ui_y);
@@ -444,6 +494,8 @@ static void DrawPokemonMenu(int x, int y, int w, int h,
 void Game::DrawUI(int ui_y) {
 	// draw ui
 
+	const Player* players = players_visual;
+
 	int _x = 0;
 	int _y = ui_y;
 
@@ -463,6 +515,8 @@ void Game::DrawUI(int ui_y) {
 		DrawText(font, x, y, buf);
 	}
 
+	DrawNineslice(_x, _y, GAME_W, GAME_H - _y);
+
 	switch (state) {
 		case GAME_STATE_SELECT_POKEMON: {
 			int x = _x;
@@ -470,15 +524,13 @@ void Game::DrawUI(int ui_y) {
 
 			const Player& p = players[player_index];
 
-			DrawPokemonMenu(x, y, GAME_W, GAME_H - y, cursor, p);
+			DrawPokemonMenu(x, y, GAME_W, GAME_H - y, cursor, p, true);
 			break;
 		}
 
 		case GAME_STATE_SELECT_ACTION: {
 			int x = _x;
 			int y = _y;
-
-			DrawNineslice(x, y, GAME_W, GAME_H - y);
 
 			x += 8;
 			y += 8;
@@ -518,13 +570,38 @@ void Game::DrawUI(int ui_y) {
 					const PokemonData* data = GetPokemonData(pokemon.type);
 
 					for (int i = 0; i < data->attack_count; i++) {
-						DrawText(game->font, x, y + i * i, data->attacks[i].name);
+						DrawText(font, x, y + 8 * i, data->attacks[i].name);
 					}
 				} else if (submenu == 2) {
 					const Player& p = players[player_index];
 					DrawPokemonMenu(x, y, GAME_W - x, GAME_H - y, submenu_cursor, p, true);
 				}
 			}
+			break;
+		}
+
+		case GAME_STATE_WATCHING_ATTACK_ANIM: {
+			const Player& p = players[player_index];
+			const Pokemon& pokemon = p.pokemon[p.pokemon_index];
+			const PokemonData* data = GetPokemonData(pokemon.type);
+			const AttackData& attack = data->attacks[animation_attack_index];
+
+			int x = _x + 8;
+			int y = _y + 8;
+
+			char buf[100];
+			stb_snprintf(buf, min(text_teletype + 1, (int)sizeof(buf)), "%s использует %s!", data->name, attack.name);
+			DrawText(font, x, y, buf);
+			break;
+		}
+
+		case GAME_STATE_WON: {
+			int x = _x + 8;
+			int y = _y + 8;
+
+			char buf[100];
+			stb_snprintf(buf, min(text_teletype + 1, (int)sizeof(buf)), "Игрок %d победил!", player_index + 1);
+			DrawText(font, x, y, buf);
 			break;
 		}
 	}
