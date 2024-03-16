@@ -155,18 +155,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Assets.cpp" />
-    <ClCompile Include="src\Game.cpp" />
-    <ClCompile Include="src\GameData.cpp" />
-    <ClCompile Include="src\Global.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Assets.h" />
     <ClInclude Include="src\common.h" />
-    <ClInclude Include="src\Game.h" />
-    <ClInclude Include="src\GameData.h" />
-    <ClInclude Include="src\Global.h" />
     <ClInclude Include="src\mathh.h" />
   </ItemGroup>
   <ItemGroup>
