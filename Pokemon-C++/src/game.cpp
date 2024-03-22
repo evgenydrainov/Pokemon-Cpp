@@ -187,7 +187,9 @@ void Game::update(float delta) {
 		dest.w = 56;
 		dest.h = 56;
 
-		draw_list_add_texture(draw_list, texture, src, dest);
+		if (!p.blink || ((SDL_GetTicks() / 100) % 2)) {
+			draw_list_add_texture(draw_list, texture, src, dest);
+		}
 
 		int x = dest.x;
 		int y = dest.y - 3 * font->lineskip;
@@ -480,9 +482,12 @@ void Game::battle_script(mco_coro* co) {
 					Pokemon& opponent_pokemon = opponent.pokemon[opponent.pokemon_index];
 					pokemon_visual[1 - player_index].hp_target = opponent_pokemon.hp;
 				}
+				pokemon_visual[1 - player_index].blink = true;
 			}
 
 			wait(co, 60);
+
+			pokemon_visual[1 - player_index].blink = false;
 
 			destroy_dialog(teletype_dialog_id);
 			update_pokemon_visual = true;

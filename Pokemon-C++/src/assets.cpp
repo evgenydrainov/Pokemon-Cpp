@@ -12,7 +12,6 @@ SDL_Texture* tex_pokemon_front;
 SDL_Texture* tex_ms_gothic;
 SDL_Texture* tex_nineslice2;
 SDL_Texture* tex_attack_slash_right;
-SDL_Texture* tex_element_icon;
 
 const Font* fnt_gameboy = &_fnt_gameboy;
 const Font* fnt_ms_gothic = &_fnt_ms_gothic;
@@ -28,7 +27,6 @@ void load_assets() {
 		tex_ms_gothic = IMG_LoadTexture(game->renderer, "textures/ms_gothic.png");
 		tex_nineslice2 = IMG_LoadTexture(game->renderer, "textures/nineslice2.png");
 		tex_attack_slash_right = IMG_LoadTexture(game->renderer, "textures/attack_slash_right.png");
-		tex_element_icon = IMG_LoadTexture(game->renderer, "textures/element_icon.png");
 
 		IMG_Quit();
 	}
@@ -38,7 +36,6 @@ void load_assets() {
 }
 
 void unload_assets() {
-	SDL_DestroyTexture(tex_element_icon);
 	SDL_DestroyTexture(tex_attack_slash_right);
 	SDL_DestroyTexture(tex_nineslice2);
 	SDL_DestroyTexture(tex_ms_gothic);

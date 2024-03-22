@@ -34,6 +34,7 @@ struct PokemonVisual {
 	int y;
 	bool front;
 	bool visible;
+	bool blink;
 };
 
 struct Player {
