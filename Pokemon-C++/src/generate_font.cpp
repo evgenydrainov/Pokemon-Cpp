@@ -7,13 +7,9 @@
 #include <string>
 #include <iostream>
 
-struct Glyph {
-	SDL_Rect src;
-	int xoffset;
-	int yoffset;
-	int advance;
-};
+#include "assets.h"
 
+/*
 struct Font {
 	SDL_Texture* texture;
 	int ptsize;
@@ -132,22 +128,26 @@ out:
 
 	return !error;
 }
+//*/
 
 Glyph glyphs[224];
 
-int main2(int argc, char* argv[]) {
-	SDL_Init(SDL_INIT_VIDEO);
-	IMG_Init(IMG_INIT_PNG);
-	TTF_Init();
+void print_glyphs(const Glyph* glyphs) {
+	std::cout << "static const Glyph _fnt__glyphs[224] = {\n";
+	for (int ch = 32; ch <= 255; ch++) {
+		int low = ch & 0xf;
+		int high = (ch >> 4) & 0xf;
+		char alphabet[] = "0123456789ABCDEF";
 
-	// SDL_Window* window = SDL_CreateWindow("", 0, 0, 640, 480, 0);
-	// SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+		const Glyph& g = glyphs[ch - 32];
+		printf("\t/* 0x%c%c */ {{%4d, %4d, %4d, %4d}, %4d, %4d, %4d},\n",
+			   alphabet[high], alphabet[low], g.src.x, g.src.y, g.src.w, g.src.h, g.xoffset, g.yoffset, g.advance);
+	}
+	std::cout << "};\n";
+}
 
-	// Font font;
-	// LoadFontFromFileTTF(nullptr, &font, "msgothic.ttc", 9, 0);
-
-	//*
-	std::ifstream f("out.fnt");
+void generate_c_code_from_fnt_file(const char* filepath) {
+	std::ifstream f(filepath);
 	std::string line;
 	while (std::getline(f, line)) {
 		std::stringstream stream(line);
@@ -197,7 +197,24 @@ int main2(int argc, char* argv[]) {
 
 		}
 	}
-	//*/
+
+	print_glyphs(glyphs);
+}
+
+int main(int argc, char* argv[]) {
+	SDL_Init(SDL_INIT_VIDEO);
+	IMG_Init(IMG_INIT_PNG);
+	TTF_Init();
+
+	// SDL_Window* window = SDL_CreateWindow("", 0, 0, 640, 480, 0);
+	// SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+
+	// Font font;
+	// LoadFontFromFileTTF(nullptr, &font, "msgothic.ttc", 9, 0);
+
+	// generate_c_code_from_fnt_file("out.fnt");
+
+	print_glyphs(fnt_ms_gothic->glyphs);
 
 	/*
 	for (int ch = 32; ch <= 255; ch++) {
@@ -208,14 +225,6 @@ int main2(int argc, char* argv[]) {
 		g.advance = 8;
 	}
 	//*/
-
-	std::cout << "Glyph glyphs[224] = {\n";
-	for (int ch = 32; ch <= 255; ch++) {
-		Glyph& g = glyphs[ch - 32];
-		printf("\t{{%4d, %4d, %4d, %4d}, %4d, %4d, %4d},\n",
-			   g.src.x, g.src.y, g.src.w, g.src.h, g.xoffset, g.yoffset, g.advance);
-	}
-	std::cout << "};\n";
 
 	return 0;
 }

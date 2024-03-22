@@ -90,7 +90,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)external\SDL2\include\;$(SolutionDir)external\SDL2_image\include\;$(SolutionDir)external\SDL2_mixer\include\;$(SolutionDir)external\SDL2_ttf\include\;$(SolutionDir)external\minicoro\include\;$(SolutionDir)external\stb\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -107,7 +107,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)external\SDL2\include\;$(SolutionDir)external\SDL2_image\include\;$(SolutionDir)external\SDL2_mixer\include\;$(SolutionDir)external\SDL2_ttf\include\;$(SolutionDir)external\minicoro\include\;$(SolutionDir)external\stb\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -124,7 +124,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)external\SDL2\include\;$(SolutionDir)external\SDL2_image\include\;$(SolutionDir)external\SDL2_mixer\include\;$(SolutionDir)external\SDL2_ttf\include\;$(SolutionDir)external\minicoro\include\;$(SolutionDir)external\stb\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -141,7 +141,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)external\SDL2\include\;$(SolutionDir)external\SDL2_image\include\;$(SolutionDir)external\SDL2_mixer\include\;$(SolutionDir)external\SDL2_ttf\include\;$(SolutionDir)external\minicoro\include\;$(SolutionDir)external\stb\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -155,11 +155,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\assets.cpp" />
+    <ClCompile Include="src\drawing.cpp" />
+    <ClCompile Include="src\game.cpp" />
+    <ClCompile Include="src\game_data.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\single_header.cpp" />
+    <ClCompile Include="src\text.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\assets.h" />
     <ClInclude Include="src\common.h" />
+    <ClInclude Include="src\drawing.h" />
+    <ClInclude Include="src\font_data.h" />
+    <ClInclude Include="src\game.h" />
+    <ClInclude Include="src\game_data.h" />
     <ClInclude Include="src\mathh.h" />
+    <ClInclude Include="src\text.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="env.txt" />
