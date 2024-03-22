@@ -193,10 +193,7 @@ void Game::update(float delta) {
 		int y = dest.y - 3 * font->lineskip;
 		const char* text = get_pokemon_data(p.id)->name;
 
-		draw_list_add_texture(draw_list, tex_element_icon, {data->element * 9, 0, 9, 9}, {x, y + 1, 9, 9});
-
-		draw_list_add_set_color(draw_list, {0, 0, 0, 255});
-		draw_list_add_text(draw_list, font, x + 10, y, text);
+		draw_list_add_text(draw_list, font, x, y, text);
 		y += font->lineskip;
 		{
 			char buf[16];
@@ -210,7 +207,6 @@ void Game::update(float delta) {
 			draw_list_add_text(draw_list, font, x, y, buf);
 			y += font->lineskip;
 		}
-		draw_list_add_set_color(draw_list, {255, 255, 255, 255});
 	}
 
 	{
@@ -224,11 +220,9 @@ void Game::update(float delta) {
 		draw_list_add_nineslice(draw_list, nineslice_texture,
 								panel_x, panel_y, panel_w, panel_h);
 
-		draw_list_add_set_color(draw_list, {0, 0, 0, 255});
 		draw_list_add_text(draw_list, font,
 							panel_x + slice_w, panel_y + slice_h,
 							buf);
-		draw_list_add_set_color(draw_list, {255, 255, 255, 255});
 	}
 
 	draw_list_add_nineslice(draw_list, nineslice_texture,
@@ -250,8 +244,6 @@ void Game::update(float delta) {
 				x += slice_w;
 				y += slice_h;
 
-				draw_list_add_set_color(draw_list, {0, 0, 0, 255});
-
 				if (d.selection.label) {
 					draw_list_add_text(draw_list, font, x, y, d.selection.label);
 					y += font->lineskip;
@@ -261,13 +253,13 @@ void Game::update(float delta) {
 
 				for (int i = 0; i < d.selection.item_count; i++) {
 					if (d.selection.disabled_items & (1 << i)) {
-						draw_list_add_set_color(draw_list, {128, 128, 128, 255});
+						draw_list_add_set_color(draw_list, {255, 255, 255, 128});
 					}
 
 					draw_list_add_text(draw_list, font, x, y, d.selection.items[i]);
 
 					if (d.selection.disabled_items & (1 << i)) {
-						draw_list_add_set_color(draw_list, {0, 0, 0, 255});
+						draw_list_add_set_color(draw_list, {255, 255, 255, 255});
 					}
 
 					if (i == d.selection.cursor) {
@@ -278,8 +270,6 @@ void Game::update(float delta) {
 
 					y += font->lineskip;
 				}
-
-				draw_list_add_set_color(draw_list, {255, 255, 255, 255});
 
 				break;
 			}
@@ -295,9 +285,7 @@ void Game::update(float delta) {
 				const char* text = d.teletype.text;
 				int max_chars = d.teletype.count++;
 
-				draw_list_add_set_color(draw_list, {0, 0, 0, 255});
 				draw_list_add_text(draw_list, font, x, y, text, line_w, max_chars);
-				draw_list_add_set_color(draw_list, {255, 255, 255, 255});
 
 				break;
 			}
@@ -525,9 +513,7 @@ l_player_won:
 		stb_snprintf(buf, sizeof(buf), "Игрок %d победил!", player_index + 1);
 		int line_width = GAME_W - 2 * slice_w;
 
-		draw_list_add_set_color(draw_list, {0, 0, 0, 255});
 		draw_list_add_text(draw_list, font, x, y, buf, line_width);
-		draw_list_add_set_color(draw_list, {255, 255, 255, 255});
 
 		mco_yield(co);
 	}
